@@ -334,53 +334,53 @@ if st.button(
     # =====================
 
 
-    st.subheader(
-        "📊 Important Risk Factors"
-    )
+    # st.subheader(
+    #     "📊 Important Risk Factors"
+    # )
 
 
-    rf = (
-        model
-        .named_steps["model"]
-    )
+    # rf = (
+    #     model
+    #     .named_steps["model"]
+    # )
 
 
-    importance = (
-        rf.feature_importances_
-    )
+    # importance = (
+    #     rf.feature_importances_
+    # )
 
 
-    feature_names = (
-        model
-        .named_steps["preprocessor"]
-        .get_feature_names_out()
-    )
+    # feature_names = (
+    #     model
+    #     .named_steps["preprocessor"]
+    #     .get_feature_names_out()
+    # )
 
 
 
-    importance_df = pd.DataFrame(
-        {
-            "Feature": feature_names,
-            "Importance": importance
-        }
-    )
+    # importance_df = pd.DataFrame(
+    #     {
+    #         "Feature": feature_names,
+    #         "Importance": importance
+    #     }
+    # )
 
 
-    importance_df = (
-        importance_df
-        .sort_values(
-            "Importance",
-            ascending=False
-        )
-        .head(10)
-    )
+    # importance_df = (
+    #     importance_df
+    #     .sort_values(
+    #         "Importance",
+    #         ascending=False
+    #     )
+    #     .head(10)
+    # )
 
 
-    st.bar_chart(
-        importance_df.set_index(
-            "Feature"
-        )
-    )
+    # st.bar_chart(
+    #     importance_df.set_index(
+    #         "Feature"
+    #     )
+    # )
 
 
 
