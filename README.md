@@ -1,174 +1,121 @@
 # 🏥 Hospital Readmission Prediction
 
-Machine Learning Web Application สำหรับทำนายความเสี่ยงที่ผู้ป่วยโรคเบาหวานจะกลับมาโรงพยาบาลภายใน 30 วันหลัง discharge
-
-🔗 **Live Demo:**  
-https://hospital-readmission-prediction-kqdlipdjdbz4sj8yqnfb6p.streamlit.app/
-
----
+Machine Learning project for predicting whether a diabetic patient is likely to be readmitted to the hospital within 30 days after discharge.
 
 ## 🎯 Problem Statement
 
-Early hospital readmission เป็นปัญหาสำคัญที่ส่งผลต่อคุณภาพการรักษาและค่าใช้จ่ายของระบบสาธารณสุข
-
-โปรเจกต์นี้มุ่งสร้าง Machine Learning model เพื่อช่วยระบุผู้ป่วยที่มีความเสี่ยงสูงต่อการ readmit ภายใน 30 วัน เพื่อสนับสนุนการวางแผนดูแลผู้ป่วยเชิงป้องกัน
-
-> Note: This project is for educational purposes only and is not intended for clinical decision-making.
-
----
+Hospital readmissions increase healthcare costs and may indicate gaps in patient care. Early identification of high-risk patients can help healthcare providers plan follow-up treatments and interventions more effectively.
 
 ## 📊 Dataset
 
-**Dataset:** Diabetes 130-US Hospitals Dataset (UCI Machine Learning Repository)
+**UCI Diabetes 130-US Hospitals Dataset**
 
-รายละเอียด:
-- 101,766 patient records
-- 50 original features
-- Target:
-  - `<30` → Readmitted within 30 days (High Risk)
-  - `NO`, `>30` → Not readmitted within 30 days
+* 101,766 patient encounters
+* 50 original features
+* Data collected from 130 US hospitals
+* Binary classification task:
 
----
+  * `1` = Readmitted within 30 days (`<30`)
+  * `0` = Not readmitted within 30 days
 
-## 🔄 Data Processing
+## 🔧 Data Preprocessing
 
-ขั้นตอน preprocessing:
+The following preprocessing steps were applied:
 
-- Removed features with high missing values:
-  - `weight`
-  - `medical_specialty`
-  - `payer_code`
+* Removed columns with excessive missing values:
 
-- Handled missing values:
-  - Replaced missing race values with `Unknown`
-  - Removed incomplete diagnosis records
+  * `weight`
+  * `medical_specialty`
+  * `payer_code`
+* Replaced missing race values (`?`) with `Unknown`
+* Removed records with missing diagnosis codes
+* Removed identifier columns:
 
-- Removed identifiers:
-  - `encounter_id`
-  - `patient_nbr`
+  * `encounter_id`
+  * `patient_nbr`
+* Converted target variable into binary classification
 
-- Encoded categorical features using Label Encoding
+## 🤖 Model Pipeline
 
-- Addressed class imbalance using:
-  - `class_weight="balanced"`
+The project uses a Scikit-Learn Pipeline consisting of:
 
----
+1. Data Cleaning
+2. Missing Value Imputation
+3. One-Hot Encoding for categorical features
+4. Random Forest Classification
 
-## 🤖 Machine Learning Model
+### Preprocessing
 
-Model: **Random Forest Classifier**
+* Numerical Features:
 
-Configuration:
-- n_estimators = 300
-- max_depth = 15
-- class_weight = balanced
+  * Median Imputation
 
-เพิ่มเติม:
-- Probability threshold tuning
-- Optimized decision threshold: `0.45`
+* Categorical Features:
 
----
+  * Most Frequent Imputation
+  * One-Hot Encoding (`handle_unknown="ignore"`)
+
+### Model
+
+RandomForestClassifier
+
+* n_estimators = 300
+* max_depth = 15
+* min_samples_split = 20
+* class_weight = "balanced"
+* random_state = 42
 
 ## 📈 Model Performance
 
-Evaluation:
+Evaluation Metric:
 
-| Metric | Score |
-|---|---:|
-| ROC-AUC | 0.6638 |
-| Recall (High-risk patients) | 0.51 |
-| F1-score (High-risk patients) | 0.27 |
+* ROC-AUC Score: **0.655**
 
-เนื่องจาก dataset มี class imbalance สูง จึงให้ความสำคัญกับ Recall ของกลุ่มผู้ป่วยเสี่ยงมากกว่า Accuracy
+ROC-AUC was selected because the dataset is imbalanced, making accuracy alone an unreliable performance metric.
 
----
+## 🖥️ Streamlit Application
 
-## 🔍 Feature Importance
+The trained model is deployed using Streamlit and allows users to:
 
-Top features ที่ model ใช้ในการทำนาย:
-
-| Feature | Importance |
-|---|---:|
-| number_inpatient | 0.133 |
-| diag_1 | 0.084 |
-| num_lab_procedures | 0.076 |
-| diag_2 | 0.076 |
-| diag_3 | 0.075 |
-| discharge_disposition_id | 0.073 |
-| num_medications | 0.068 |
-
-Insight:
-- ประวัติการ admit ก่อนหน้าเป็นปัจจัยสำคัญที่สุด
-- จำนวนการตรวจ Lab และจำนวนยาสะท้อนความซับซ้อนของอาการผู้ป่วย
-- Diagnosis codes มีผลต่อความเสี่ยง readmission
-
----
+* Input patient information
+* Predict readmission probability
+* View risk assessment results in real time
 
 ## 🛠️ Tech Stack
 
-### Programming
-- Python
+* Python
+* Pandas
+* NumPy
+* Scikit-Learn
+* Joblib
+* Streamlit
 
-### Data Processing
-- pandas
-- numpy
+## 📂 Project Structure
 
-### Machine Learning
-- scikit-learn
-- Random Forest
-
-### Deployment
-- Streamlit Cloud
-
----
-
-## 📁 Project Structure
-```
+```text
 hospital-readmission-prediction/
-├── app.py                  # Streamlit frontend
-├── train.py                # Training pipeline
-├── models/
-│   └── model_pipeline.pkl  # preprocessing + model
-├── data/
-│   └── diabetic_data.csv
-├── notebooks/
-│   └── EDA.ipynb
+│
+├── app.py
+├── train.py
 ├── requirements.txt
 ├── README.md
-└── .gitignore
+│
+├── data/
+│   └── diabetic_data.csv
+│
+└── models/
+    └── model_pipeline.pkl
 ```
 
----
+## 🚀 Demo
 
-## 🚀 How to Run Locally
+Streamlit App: https://hospital-readmission-prediction-nkb356wrnxekyb4eipm2ww.streamlit.app/
 
-Install dependencies:
+## 📚 Future Improvements
 
-```bash
-pip install -r requirements.txt
-```
-Train model:
-```bash
-python train.py
-```
-Run application:
-```bash
-streamlit run app.py
-```
-
----
-
-## 🔮 Future Improvements
-- Replace Label Encoding with One-Hot Encoding pipeline
-- Try advanced boosting models:
-    - XGBoost
-    - LightGBM
-- Add explainability using SHAP
-- Improve model calibration
-- Add patient risk dashboard
-
----
-
-## 👨‍💻 Author
-
-Developed as a Machine Learning deployment project using Python and Streamlit.
+* Hyperparameter Optimization
+* Feature Importance Analysis
+* Explainable AI (SHAP)
+* XGBoost / LightGBM Comparison
+* Threshold Optimization
+* Cross Validation
