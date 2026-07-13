@@ -3,7 +3,7 @@
 Machine Learning Web Application สำหรับทำนายความเสี่ยงที่ผู้ป่วยโรคเบาหวานจะกลับมาโรงพยาบาลภายใน 30 วันหลัง discharge
 
 🔗 **Live Demo:**  
-https://hospital-readmission-prediction-nkb356wrnxekyb4eipm2ww.streamlit.app/
+https://hospital-readmission-prediction-kqdlipdjdbz4sj8yqnfb6p.streamlit.app/
 
 ---
 
