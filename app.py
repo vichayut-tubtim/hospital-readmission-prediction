@@ -356,35 +356,62 @@ with tab2:
 
 
     st.subheader(
-        "📊 Important Risk Factors"
+        "📊 Feature Importance (Random Forest)"
     )
 
 
     top_features = (
         feature_importance
         .head(10)
+        .copy()
+    )
+
+
+    # Convert importance to percentage
+    top_features["Importance (%)"] = (
+        top_features["Importance"] * 100
+    ).round(2)
+
+
+    # Reverse order for better visualization
+    chart_data = (
+        top_features
+        .sort_values(
+            "Importance (%)",
+            ascending=True
+        )
     )
 
 
     st.bar_chart(
-        top_features.set_index(
+        chart_data.set_index(
             "Feature"
-        )["Importance"]
+        )["Importance (%)"]
+    )
+
+
+    st.write(
+        "Top 10 features that contributed most to the Random Forest prediction:"
+    )
+
+
+    display_df = (
+        top_features[
+            [
+                "Feature",
+                "Importance (%)"
+            ]
+        ]
     )
 
 
     st.dataframe(
-        top_features,
-        width="stretch"
+        display_df,
+        width="stretch",
+        hide_index=True
     )
 
 
     st.caption(
-        "Feature importance was generated during model training."
+        "Feature importance shows which variables influenced the model decision most during training. It does not represent causation."
     )
-
-
-
-st.caption(
-    "Educational project only. Not for clinical decision-making."
-)
