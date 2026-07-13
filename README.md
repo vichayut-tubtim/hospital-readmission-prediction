@@ -219,10 +219,17 @@ Application features:
 ✅ Risk assessment visualization  
 ✅ Model explainability support  
 
+## Demo Screenshot
+
+![Streamlit Demo](screenshots/demo1.png)
+![Streamlit Demo](screenshots/demo2.png)
+![Streamlit Demo](screenshots/demo3.png)
+![Streamlit Demo](screenshots/demo4.png)
+![Streamlit Demo](screenshots/demo5.png)
 
 Demo:
 
-https://hospital-readmission-prediction-kqdlipdjdbz4sj8yqnfb6p.streamlit.app/
+https://hospital-readmission-prediction-dczefyekstgt69vswkk4r8.streamlit.app/
 
 ---
 
