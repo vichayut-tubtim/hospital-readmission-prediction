@@ -1,38 +1,47 @@
 import pandas as pd
 import joblib
 
-from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.impute import SimpleImputer
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, roc_auc_score, f1_score
+from sklearn.metrics import roc_auc_score
 
-df = pd.read_csv("diabetic_data.csv")
+
+df = pd.read_csv("data/diabetic_data.csv")
+
 print("Original shape:", df.shape)
 
 # Cleaning
-df = df.drop(columns=["weight", "medical_specialty", "payer_code"], errors="ignore")
+df = df.drop(columns=[
+    "weight",
+    "medical_specialty",
+    "payer_code"
+])
+
 df["race"] = df["race"].replace("?", "Unknown")
 
-for col in ["diag_1", "diag_2", "diag_3"]:
+for col in ["diag_1","diag_2","diag_3"]:
     df = df[df[col] != "?"]
 
 # Target
-df["readmitted_binary"] = (df["readmitted"] == "<30").astype(int)
+df["readmitted_binary"] = (
+    df["readmitted"] == "<30"
+).astype(int)
 
-df = df.drop(columns=["encounter_id", "patient_nbr", "readmitted"])
 
-# Encoding
-encoders = {}
-cat_cols = df.select_dtypes(include="object").columns
+df = df.drop(columns=[
+    "encounter_id",
+    "patient_nbr",
+    "readmitted"
+])
 
-for col in cat_cols:
-    le = LabelEncoder()
-    df[col] = le.fit_transform(df[col].astype(str))
-    encoders[col] = le
 
-# Split
 X = df.drop(columns=["readmitted_binary"])
 y = df["readmitted_binary"]
+
 
 X_train, X_test, y_train, y_test = train_test_split(
     X,
@@ -42,7 +51,54 @@ X_train, X_test, y_train, y_test = train_test_split(
     stratify=y
 )
 
-# Model
+
+# columns
+cat_cols = X_train.select_dtypes(
+    include="object"
+).columns
+
+num_cols = X_train.select_dtypes(
+    exclude="object"
+).columns
+
+
+# preprocessing
+numeric_pipeline = Pipeline([
+    (
+        "imputer",
+        SimpleImputer(strategy="median")
+    )
+])
+
+
+categorical_pipeline = Pipeline([
+    (
+        "imputer",
+        SimpleImputer(strategy="most_frequent")
+    ),
+    (
+        "encoder",
+        OneHotEncoder(
+            handle_unknown="ignore"
+        )
+    )
+])
+
+
+preprocessor = ColumnTransformer([
+    (
+        "num",
+        numeric_pipeline,
+        num_cols
+    ),
+    (
+        "cat",
+        categorical_pipeline,
+        cat_cols
+    )
+])
+
+
 model = RandomForestClassifier(
     n_estimators=300,
     max_depth=15,
@@ -52,36 +108,43 @@ model = RandomForestClassifier(
     class_weight="balanced"
 )
 
-model.fit(X_train, y_train)
 
-# Evaluation
-y_prob = model.predict_proba(X_test)[:, 1]
+pipeline = Pipeline([
+    (
+        "preprocessor",
+        preprocessor
+    ),
+    (
+        "model",
+        model
+    )
+])
 
-print("ROC-AUC:", round(roc_auc_score(y_test, y_prob), 4))
 
-best_threshold = 0
-best_f1 = 0
+pipeline.fit(
+    X_train,
+    y_train
+)
 
-for threshold in [0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]:
-    y_pred = (y_prob >= threshold).astype(int)
-    f1 = f1_score(y_test, y_pred)
 
-    print(f"Threshold {threshold}: F1={f1:.4f}")
+prob = pipeline.predict_proba(
+    X_test
+)[:,1]
 
-    if f1 > best_f1:
-        best_f1 = f1
-        best_threshold = threshold
 
-print("\nBest threshold:", best_threshold)
+print(
+    "ROC-AUC:",
+    roc_auc_score(
+        y_test,
+        prob
+    )
+)
 
-final_pred = (y_prob >= best_threshold).astype(int)
 
-print(classification_report(y_test, final_pred))
+joblib.dump(
+    pipeline,
+    "models/model_pipeline.pkl"
+)
 
-# Save
-joblib.dump(model, "model.pkl")
-joblib.dump(list(X.columns), "features.pkl")
-joblib.dump(encoders, "encoders.pkl")
-joblib.dump(best_threshold, "threshold.pkl")
 
 print("Model saved!")
