@@ -1,2 +1,6 @@
-model.pkl
-features.pkl
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+.streamlit/
