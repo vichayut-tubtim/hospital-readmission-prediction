@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
 import joblib
 
 
@@ -354,7 +355,6 @@ with tab1:
 
 with tab2:
 
-
     st.subheader(
         "📊 Feature Importance (Random Forest)"
     )
@@ -367,13 +367,12 @@ with tab2:
     )
 
 
-    # Convert importance to percentage
     top_features["Importance (%)"] = (
         top_features["Importance"] * 100
     ).round(2)
 
 
-    # Reverse order for better visualization
+    # Sort for horizontal bar chart
     chart_data = (
         top_features
         .sort_values(
@@ -383,11 +382,37 @@ with tab2:
     )
 
 
-    st.bar_chart(
-        chart_data.set_index(
-            "Feature"
-        )["Importance (%)"]
+    fig, ax = plt.subplots(
+        figsize=(8, 5)
     )
+
+
+    ax.barh(
+        chart_data["Feature"],
+        chart_data["Importance (%)"]
+    )
+
+
+    ax.set_xlabel(
+        "Importance (%)"
+    )
+
+
+    ax.set_ylabel(
+        "Feature"
+    )
+
+
+    ax.set_title(
+        "Top 10 Important Features"
+    )
+
+
+    plt.tight_layout()
+
+
+    st.pyplot(fig)
+
 
 
     st.write(
@@ -395,18 +420,13 @@ with tab2:
     )
 
 
-    display_df = (
+    st.dataframe(
         top_features[
             [
                 "Feature",
                 "Importance (%)"
             ]
-        ]
-    )
-
-
-    st.dataframe(
-        display_df,
+        ],
         width="stretch",
         hide_index=True
     )
