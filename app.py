@@ -21,7 +21,7 @@ def train_model():
     
     # Encode
     le = LabelEncoder()
-    for col in df.select_dtypes(include='object').columns:
+    for col in df.select_dtypes(include='str').columns:
         df[col] = le.fit_transform(df[col].astype(str))
     
     X = df.drop(columns=['readmitted_binary'])
