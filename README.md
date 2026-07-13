@@ -125,13 +125,17 @@ Insight:
 ## 📁 Project Structure
 ```
 hospital-readmission-prediction/
-├── app.py # Streamlit application
-├── train.py # Model training pipeline
+├── app.py                  # Streamlit frontend
+├── train.py                # Training pipeline
+├── models/
+│   └── model_pipeline.pkl  # preprocessing + model
+├── data/
+│   └── diabetic_data.csv
+├── notebooks/
+│   └── EDA.ipynb
 ├── requirements.txt
-├── model.pkl
-├── features.pkl
-├── encoders.pkl
-└── threshold.pkl
+├── README.md
+└── .gitignore
 ```
 
 ---
