@@ -283,26 +283,20 @@ with tab1:
         )
 
 
-        col1, col2 = st.columns(2)
 
+        if probability >= 0.45:
 
+            st.error(
+                f"⚠️ High Risk\n\n"
+                f"Probability of Readmission: {probability:.1%}"
+            )
 
-        with col1:
+        else:
 
-
-            if probability >= 0.45:
-
-                st.error(
-                    f"⚠️ High Risk\n\n"
-                    f"Probability of Readmission: {probability:.1%}"
-                )
-
-            else:
-
-                st.success(
-                    f"✅ Low Risk\n\n"
-                    f"Probability of Readmission: {probability:.1%}"
-                )
+            st.success(
+                f"✅ Low Risk\n\n"
+                f"Probability of Readmission: {probability:.1%}"
+            )
 
 
         st.info(
