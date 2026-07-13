@@ -109,7 +109,7 @@ hospital-readmission-prediction/
 
 ## 🚀 Demo
 
-Streamlit App: https://hospital-readmission-prediction-nkb356wrnxekyb4eipm2ww.streamlit.app/
+Streamlit App: https://hospital-readmission-prediction-kqdlipdjdbz4sj8yqnfb6p.streamlit.app/
 
 ## 📚 Future Improvements
 
