@@ -136,13 +136,9 @@ Model configuration:
 
 ```
 n_estimators = 300
-
 max_depth = 15
-
 min_samples_split = 20
-
 class_weight = balanced
-
 random_state = 42
 ```
 
@@ -262,7 +258,6 @@ https://hospital-readmission-prediction-kqdlipdjdbz4sj8yqnfb6p.streamlit.app/
 
 ```
 hospital-readmission-prediction/
-
 │
 ├── app.py
 ├── train.py
@@ -305,9 +300,7 @@ Generated files:
 
 ```
 models/model_pipeline.pkl
-
 models/feature_importance.csv
-
 screenshots/*.png
 ```
 
@@ -340,6 +333,4 @@ Possible improvements:
 
 Machine Learning Portfolio Project
 
-Built with:
-
-Python + Scikit-Learn + Streamlit
+Built with: Python + Scikit-Learn + Streamlit
