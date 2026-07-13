@@ -181,10 +181,9 @@ rf_model = RandomForestClassifier(
     max_depth=15,
     min_samples_split=20,
     random_state=42,
-    n_jobs=-1,
+    n_jobs=1,
     class_weight="balanced"
 )
-
 
 
 pipeline = Pipeline([
