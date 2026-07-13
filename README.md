@@ -51,6 +51,9 @@ The dataset is highly imbalanced, with fewer positive readmission cases.
 ```
 hospital-readmission-prediction/
 │
+├── .devcontainer/
+│   └── devcontainer.json
+│
 ├── app.py
 ├── train.py
 ├── requirements.txt
