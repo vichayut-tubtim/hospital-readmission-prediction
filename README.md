@@ -46,30 +46,68 @@ The dataset is highly imbalanced, with fewer positive readmission cases.
 
 ---
 
+# 📂 Project Structure
+
+```
+hospital-readmission-prediction/
+│
+├── app.py
+├── train.py
+├── requirements.txt
+├── runtime.txt
+├── README.md
+├── .gitignore
+├── .python-version
+├── .gitattributes
+│
+├── data/
+│   └── diabetic_data.csv
+│
+├── models/
+│   ├── model_pipeline.pkl
+│   └── feature_importance.csv
+│
+├── notebooks/
+│   └── (exploratory data analysis notebooks)
+│
+└── screenshots/
+    ├── confusion_matrix.png
+    ├── classification_report.png
+    ├── roc_curve.png
+    └── feature_importance.png
+```
+
+---
+
 # 🏗️ System Architecture
 
 ```
-                Dataset
-                   |
-                   v
-          Data Cleaning
-                   |
-                   v
+                 Dataset
+                    |
+                    v
+            Data Cleaning
+                    |
+                    v
         Missing Value Handling
-                   |
-                   v
-       Feature Transformation
-                   |
-                   v
-     Random Forest Classifier
-                   |
-          +--------+--------+
-          |                 |
-          v                 v
-   Prediction Result   Feature Importance
-          |
-          v
-     Streamlit Web App
+                    |
+                    v
+    Feature Encoding & Transformation
+                    |
+                    v
+          Random Forest Model
+                    |
+                    v
+             Saved Pipeline
+          (model_pipeline.pkl)
+                    |
+                    v
+             Streamlit App
+                    |
+          +---------+---------+
+          |                   |
+          v                   v
+ Prediction Result     Model Explainability
+ (Risk Probability)    (Feature Importance)
 ```
 
 ---
@@ -258,39 +296,6 @@ https://hospital-readmission-prediction-5uhxnegmwyy2i9a6xlsz2s.streamlit.app/
 ## Deployment
 
 - Streamlit
-
----
-
-# 📂 Project Structure
-
-```
-hospital-readmission-prediction/
-│
-├── app.py
-├── train.py
-├── requirements.txt
-├── runtime.txt
-├── README.md
-├── .gitignore
-├── .python-version
-├── .gitattributes
-│
-├── data/
-│   └── diabetic_data.csv
-│
-├── models/
-│   ├── model_pipeline.pkl
-│   └── feature_importance.csv
-│
-├── notebooks/
-│   └── (exploratory data analysis notebooks)
-│
-└── screenshots/
-    ├── confusion_matrix.png
-    ├── classification_report.png
-    ├── roc_curve.png
-    └── feature_importance.png
-```
 
 ---
 
