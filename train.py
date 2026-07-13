@@ -1,10 +1,15 @@
+import os
 import pandas as pd
 import joblib
 
 from sklearn.model_selection import train_test_split
+
 from sklearn.compose import ColumnTransformer
+
 from sklearn.pipeline import Pipeline
+
 from sklearn.preprocessing import OneHotEncoder
+
 from sklearn.impute import SimpleImputer
 
 from sklearn.ensemble import RandomForestClassifier
@@ -12,20 +17,29 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
     roc_auc_score,
     confusion_matrix,
-    classification_report,
-    roc_curve
+    classification_report
 )
 
+
+
+# =====================
+# Load Dataset
+# =====================
 
 df = pd.read_csv(
     "data/diabetic_data.csv"
 )
 
-print("Original shape:", df.shape)
+
+print(
+    "Original shape:",
+    df.shape
+)
+
 
 
 # =====================
-# Data Cleaning
+# Cleaning
 # =====================
 
 df = df.drop(columns=[
@@ -41,11 +55,13 @@ df["race"] = df["race"].replace(
 )
 
 
+
 for col in [
     "diag_1",
     "diag_2",
     "diag_3"
 ]:
+
     df = df[df[col] != "?"]
 
 
@@ -59,6 +75,7 @@ df["readmitted_binary"] = (
 ).astype(int)
 
 
+
 df = df.drop(columns=[
     "encounter_id",
     "patient_nbr",
@@ -66,16 +83,20 @@ df = df.drop(columns=[
 ])
 
 
+
 X = df.drop(
-    columns=["readmitted_binary"]
+    columns=[
+        "readmitted_binary"
+    ]
 )
+
 
 y = df["readmitted_binary"]
 
 
 
 # =====================
-# Split Data
+# Split
 # =====================
 
 X_train, X_test, y_train, y_test = train_test_split(
@@ -124,6 +145,7 @@ categorical_pipeline = Pipeline([
             strategy="most_frequent"
         )
     ),
+
     (
         "encoder",
         OneHotEncoder(
@@ -133,12 +155,14 @@ categorical_pipeline = Pipeline([
 ])
 
 
+
 preprocessor = ColumnTransformer([
     (
         "num",
         numeric_pipeline,
         num_cols
     ),
+
     (
         "cat",
         categorical_pipeline,
@@ -168,6 +192,7 @@ pipeline = Pipeline([
         "preprocessor",
         preprocessor
     ),
+
     (
         "model",
         rf_model
@@ -177,7 +202,7 @@ pipeline = Pipeline([
 
 
 # =====================
-# Training
+# Train
 # =====================
 
 pipeline.fit(
@@ -199,6 +224,7 @@ prob = pipeline.predict_proba(
 pred = pipeline.predict(
     X_test
 )
+
 
 
 print(
@@ -223,6 +249,59 @@ print(
         y_test,
         pred
     )
+)
+
+
+
+# =====================
+# Feature Importance
+# =====================
+
+rf = pipeline.named_steps["model"]
+
+
+feature_names = (
+    pipeline
+    .named_steps["preprocessor"]
+    .get_feature_names_out()
+)
+
+
+importance_df = pd.DataFrame(
+    {
+        "Feature": feature_names,
+        "Importance": rf.feature_importances_
+    }
+)
+
+
+
+importance_df = (
+    importance_df
+    .sort_values(
+        "Importance",
+        ascending=False
+    )
+)
+
+
+
+os.makedirs(
+    "models",
+    exist_ok=True
+)
+
+
+
+importance_df.to_csv(
+    "models/feature_importance.csv",
+    index=False
+)
+
+
+
+print(
+    "Feature importance saved!"
 )
 
 
