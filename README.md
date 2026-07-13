@@ -269,7 +269,11 @@ hospital-readmission-prediction/
 ├── app.py
 ├── train.py
 ├── requirements.txt
+├── runtime.txt
 ├── README.md
+├── .gitignore
+├── .python-version
+├── .gitattributes
 │
 ├── data/
 │   └── diabetic_data.csv
@@ -277,6 +281,9 @@ hospital-readmission-prediction/
 ├── models/
 │   ├── model_pipeline.pkl
 │   └── feature_importance.csv
+│
+├── notebooks/
+│   └── (exploratory data analysis notebooks)
 │
 └── screenshots/
     ├── confusion_matrix.png
@@ -318,6 +325,15 @@ screenshots/*.png
 ```bash
 streamlit run app.py
 ```
+
+---
+
+## 📚 Model Limitations
+
+- Dataset contains historical hospital records.
+- Model predicts readmission risk, not medical diagnosis.
+- Feature importance indicates model decision influence, not causation.
+- Model performance may vary across different hospitals and patient populations.
 
 ---
 
