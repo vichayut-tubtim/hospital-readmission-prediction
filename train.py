@@ -6,27 +6,54 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.impute import SimpleImputer
+
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import roc_auc_score
+
+from sklearn.metrics import (
+    roc_auc_score,
+    confusion_matrix,
+    classification_report,
+    roc_curve
+)
 
 
-df = pd.read_csv("data/diabetic_data.csv")
+df = pd.read_csv(
+    "data/diabetic_data.csv"
+)
 
 print("Original shape:", df.shape)
 
-# Cleaning
+
+# =====================
+# Data Cleaning
+# =====================
+
 df = df.drop(columns=[
     "weight",
     "medical_specialty",
     "payer_code"
 ])
 
-df["race"] = df["race"].replace("?", "Unknown")
 
-for col in ["diag_1","diag_2","diag_3"]:
+df["race"] = df["race"].replace(
+    "?",
+    "Unknown"
+)
+
+
+for col in [
+    "diag_1",
+    "diag_2",
+    "diag_3"
+]:
     df = df[df[col] != "?"]
 
+
+
+# =====================
 # Target
+# =====================
+
 df["readmitted_binary"] = (
     df["readmitted"] == "<30"
 ).astype(int)
@@ -39,9 +66,17 @@ df = df.drop(columns=[
 ])
 
 
-X = df.drop(columns=["readmitted_binary"])
+X = df.drop(
+    columns=["readmitted_binary"]
+)
+
 y = df["readmitted_binary"]
 
+
+
+# =====================
+# Split Data
+# =====================
 
 X_train, X_test, y_train, y_test = train_test_split(
     X,
@@ -52,21 +87,32 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 
 
-# columns
+
+# =====================
+# Columns
+# =====================
+
 cat_cols = X_train.select_dtypes(
     include="object"
 ).columns
+
 
 num_cols = X_train.select_dtypes(
     exclude="object"
 ).columns
 
 
-# preprocessing
+
+# =====================
+# Preprocessing
+# =====================
+
 numeric_pipeline = Pipeline([
     (
         "imputer",
-        SimpleImputer(strategy="median")
+        SimpleImputer(
+            strategy="median"
+        )
     )
 ])
 
@@ -74,7 +120,9 @@ numeric_pipeline = Pipeline([
 categorical_pipeline = Pipeline([
     (
         "imputer",
-        SimpleImputer(strategy="most_frequent")
+        SimpleImputer(
+            strategy="most_frequent"
+        )
     ),
     (
         "encoder",
@@ -99,7 +147,12 @@ preprocessor = ColumnTransformer([
 ])
 
 
-model = RandomForestClassifier(
+
+# =====================
+# Model
+# =====================
+
+rf_model = RandomForestClassifier(
     n_estimators=300,
     max_depth=15,
     min_samples_split=20,
@@ -109,6 +162,7 @@ model = RandomForestClassifier(
 )
 
 
+
 pipeline = Pipeline([
     (
         "preprocessor",
@@ -116,10 +170,15 @@ pipeline = Pipeline([
     ),
     (
         "model",
-        model
+        rf_model
     )
 ])
 
+
+
+# =====================
+# Training
+# =====================
 
 pipeline.fit(
     X_train,
@@ -127,9 +186,19 @@ pipeline.fit(
 )
 
 
+
+# =====================
+# Evaluation
+# =====================
+
 prob = pipeline.predict_proba(
     X_test
 )[:,1]
+
+
+pred = pipeline.predict(
+    X_test
+)
 
 
 print(
@@ -141,10 +210,33 @@ print(
 )
 
 
+print(
+    confusion_matrix(
+        y_test,
+        pred
+    )
+)
+
+
+print(
+    classification_report(
+        y_test,
+        pred
+    )
+)
+
+
+
+# =====================
+# Save Model
+# =====================
+
 joblib.dump(
     pipeline,
     "models/model_pipeline.pkl"
 )
 
 
-print("Model saved!")
+print(
+    "Model saved!"
+)
