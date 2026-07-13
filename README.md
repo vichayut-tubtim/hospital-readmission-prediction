@@ -229,7 +229,7 @@ Application features:
 
 Demo:
 
-https://hospital-readmission-prediction-dczefyekstgt69vswkk4r8.streamlit.app/
+https://hospital-readmission-prediction-5uhxnegmwyy2i9a6xlsz2s.streamlit.app/
 
 ---
 
