@@ -68,7 +68,7 @@ hospital-readmission-prediction/
 │   └── feature_importance.csv
 │
 ├── notebooks/
-│   └── (exploratory data analysis notebooks)
+│   └── EDA.ipynb
 │
 └── screenshots/
     ├── confusion_matrix.png
@@ -197,7 +197,11 @@ Evaluation was performed using a test set (20%).
 ROC-AUC: 0.652
 ```
 
-ROC-AUC was selected as the main metric because the dataset is imbalanced.
+The performance is affected by several factors:
+
+- The dataset is highly imbalanced, with fewer positive readmission cases.
+- Patient readmission depends on complex clinical factors that may not be fully represented by available features.
+- Random Forest provides a strong baseline, but gradient boosting models may improve performance.
 
 Accuracy alone may not represent performance correctly when one class has significantly fewer samples.
 
@@ -256,6 +260,10 @@ Application features:
 ✅ Readmission probability prediction  
 ✅ Risk assessment visualization  
 ✅ Model explainability support  
+
+The Streamlit application restricts user inputs within the observed training ranges using UI constraints such as sliders and dropdowns.
+
+Categorical features are handled with OneHotEncoder(handle_unknown="ignore"), allowing unseen categories without crashing the pipeline.
 
 ## Demo Screenshot
 
