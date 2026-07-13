@@ -293,29 +293,16 @@ with tab1:
             if probability >= 0.45:
 
                 st.error(
-                    f"⚠️ High Risk\n\n{probability:.1%}"
+                    f"⚠️ High Risk\n\n"
+                    f"Probability of Readmission: {probability:.1%}"
                 )
 
             else:
 
                 st.success(
-                    f"✅ Low Risk\n\n{probability:.1%}"
+                    f"✅ Low Risk\n\n"
+                    f"Probability of Readmission: {probability:.1%}"
                 )
-
-
-
-        with col2:
-
-            st.metric(
-                "Readmission Probability",
-                f"{probability:.1%}"
-            )
-
-
-        st.progress(
-            float(probability)
-        )
-
 
 
         st.info(
