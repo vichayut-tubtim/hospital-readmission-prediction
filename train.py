@@ -2,6 +2,10 @@ import os
 import pandas as pd
 import joblib
 
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
 from sklearn.model_selection import train_test_split
 
 from sklearn.compose import ColumnTransformer
@@ -17,7 +21,8 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
     roc_auc_score,
     confusion_matrix,
-    classification_report
+    classification_report,
+    RocCurveDisplay
 )
 
 
@@ -186,6 +191,7 @@ rf_model = RandomForestClassifier(
 )
 
 
+
 pipeline = Pipeline([
     (
         "preprocessor",
@@ -225,14 +231,17 @@ pred = pipeline.predict(
 )
 
 
+roc_auc = roc_auc_score(
+    y_test,
+    prob
+)
+
 
 print(
     "ROC-AUC:",
-    roc_auc_score(
-        y_test,
-        prob
-    )
+    roc_auc
 )
+
 
 
 print(
@@ -243,12 +252,161 @@ print(
 )
 
 
+
 print(
     classification_report(
         y_test,
         pred
     )
 )
+
+
+
+# Create folder
+
+os.makedirs(
+    "screenshots",
+    exist_ok=True
+)
+
+
+
+# =====================
+# Confusion Matrix Image
+# =====================
+
+cm = confusion_matrix(
+    y_test,
+    pred
+)
+
+
+plt.figure(
+    figsize=(6,5)
+)
+
+
+sns.heatmap(
+    cm,
+    annot=True,
+    fmt="d",
+    cmap="Blues",
+    xticklabels=[
+        "No Readmission",
+        "Readmission"
+    ],
+    yticklabels=[
+        "No Readmission",
+        "Readmission"
+    ]
+)
+
+
+plt.xlabel(
+    "Predicted"
+)
+
+
+plt.ylabel(
+    "Actual"
+)
+
+
+plt.title(
+    "Confusion Matrix"
+)
+
+
+plt.tight_layout()
+
+
+plt.savefig(
+    "screenshots/confusion_matrix.png",
+    dpi=300
+)
+
+
+plt.close()
+
+
+
+# =====================
+# Classification Report Image
+# =====================
+
+report = classification_report(
+    y_test,
+    pred,
+    output_dict=True
+)
+
+
+report_df = pd.DataFrame(
+    report
+).transpose()
+
+
+plt.figure(
+    figsize=(8,4)
+)
+
+
+sns.heatmap(
+    report_df.iloc[:2,:3],
+    annot=True,
+    fmt=".2f",
+    cmap="Blues"
+)
+
+
+plt.title(
+    "Classification Report"
+)
+
+
+plt.tight_layout()
+
+
+plt.savefig(
+    "screenshots/classification_report.png",
+    dpi=300
+)
+
+
+plt.close()
+
+
+
+# =====================
+# ROC Curve Image
+# =====================
+
+plt.figure(
+    figsize=(6,5)
+)
+
+
+RocCurveDisplay.from_predictions(
+    y_test,
+    prob
+)
+
+
+plt.title(
+    f"ROC Curve (AUC={roc_auc:.3f})"
+)
+
+
+plt.tight_layout()
+
+
+plt.savefig(
+    "screenshots/roc_curve.png",
+    dpi=300
+)
+
+
+plt.close()
 
 
 
@@ -264,6 +422,7 @@ feature_names = (
     .named_steps["preprocessor"]
     .get_feature_names_out()
 )
+
 
 
 importance_df = pd.DataFrame(
@@ -302,6 +461,46 @@ importance_df.to_csv(
 print(
     "Feature importance saved!"
 )
+
+
+
+# =====================
+# Feature Importance Image
+# =====================
+
+top_features = (
+    importance_df
+    .head(10)
+)
+
+
+plt.figure(
+    figsize=(8,5)
+)
+
+
+sns.barplot(
+    data=top_features,
+    x="Importance",
+    y="Feature"
+)
+
+
+plt.title(
+    "Top 10 Feature Importance"
+)
+
+
+plt.tight_layout()
+
+
+plt.savefig(
+    "screenshots/feature_importance.png",
+    dpi=300
+)
+
+
+plt.close()
 
 
 

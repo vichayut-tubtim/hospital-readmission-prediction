@@ -2,17 +2,26 @@
 
 Machine Learning project for predicting the probability of diabetic patient readmission within 30 days after hospital discharge.
 
-The project builds an end-to-end ML pipeline including data preprocessing, model training, evaluation, explainability, and deployment with Streamlit.
+This project demonstrates an end-to-end Machine Learning workflow:
+
+- Data preprocessing
+- Feature engineering
+- Model training
+- Model evaluation
+- Model explainability
+- Streamlit deployment
+
+> ⚠️ Educational project only. This system is not intended for clinical decision-making.
 
 ---
 
 # 🎯 Problem Statement
 
-Hospital readmissions increase healthcare costs and may indicate potential gaps in patient care.
+Hospital readmissions create additional healthcare costs and may indicate potential gaps in patient care.
 
-This project aims to identify patients with higher estimated risk of readmission within 30 days, which could support healthcare providers in prioritizing follow-up strategies.
+The goal of this project is to build a classification model that estimates the likelihood of diabetic patients being readmitted within 30 days after discharge.
 
-> Note: This project is for educational purposes only and is not intended for clinical decision-making.
+The prediction can help identify higher-risk cases that may require additional follow-up attention.
 
 ---
 
@@ -20,12 +29,11 @@ This project aims to identify patients with higher estimated risk of readmission
 
 **UCI Diabetes 130-US Hospitals Dataset**
 
-Dataset characteristics:
+Dataset information:
 
 - 101,766 patient encounters
 - 50 original features
 - Data collected from 130 US hospitals
-- Binary classification problem
 
 Target:
 
@@ -34,96 +42,120 @@ Target:
 | 1 | Readmitted within 30 days (`<30`) |
 | 0 | Not readmitted within 30 days |
 
-The dataset is highly imbalanced, with significantly fewer positive readmission cases.
+The dataset is highly imbalanced, with fewer positive readmission cases.
 
 ---
 
-# 🔄 Machine Learning Pipeline
-
-The project uses a Scikit-Learn Pipeline:
+# 🏗️ System Architecture
 
 ```
-Raw Dataset
-      |
-      v
-Data Cleaning
-      |
-      v
-Missing Value Handling
-      |
-      v
-Feature Encoding
-      |
-      v
-Random Forest Classifier
-      |
-      v
-Prediction Probability
-      |
-      v
-Streamlit Web Application
+                Dataset
+                   |
+                   v
+          Data Cleaning
+                   |
+                   v
+        Missing Value Handling
+                   |
+                   v
+       Feature Transformation
+                   |
+                   v
+     Random Forest Classifier
+                   |
+          +--------+--------+
+          |                 |
+          v                 v
+   Prediction Result   Feature Importance
+          |
+          v
+     Streamlit Web App
 ```
 
 ---
 
-# 🔧 Data Preprocessing
+# 🔄 Data Preprocessing
 
-Applied preprocessing steps:
+The following preprocessing steps were applied:
 
-### Removed high missing-value columns
+## Removed high missing-value columns
+
+Removed:
 
 - `weight`
 - `medical_specialty`
 - `payer_code`
 
-### Missing value handling
+## Missing Value Handling
 
-- Replaced unknown race values (`?`) with `Unknown`
-- Removed records with missing diagnosis codes
+- Replace missing race values (`?`) with `Unknown`
+- Remove records with missing diagnosis codes
 
-### Removed identifier columns
+Removed rows containing:
+
+- `diag_1 = ?`
+- `diag_2 = ?`
+- `diag_3 = ?`
+
+## Removed Identifier Features
+
+Removed:
 
 - `encounter_id`
 - `patient_nbr`
 
-### Feature transformation
+## Feature Transformation
 
-Categorical features:
+### Numerical Features
 
-- Most Frequent Imputation
-- One-Hot Encoding
-- `handle_unknown="ignore"`
+Pipeline:
 
-Numerical features:
+```
+Median Imputation
+```
 
-- Median Imputation
+### Categorical Features
+
+Pipeline:
+
+```
+Most Frequent Imputation
+        |
+        v
+One-Hot Encoding
+(handle_unknown="ignore")
+```
 
 ---
 
-# 🤖 Model
+# 🤖 Machine Learning Model
 
 ## Random Forest Classifier
 
-Configuration:
+Model configuration:
 
 ```
 n_estimators = 300
+
 max_depth = 15
+
 min_samples_split = 20
+
 class_weight = balanced
+
 random_state = 42
 ```
 
 The model outputs:
 
 - Readmission probability
-- Risk classification based on probability threshold
+- Risk classification based on prediction threshold
 
 ---
 
 # 📈 Model Performance
 
-Evaluation was performed on a held-out test set (20%).
+Evaluation was performed using a test set (20%).
 
 ## ROC-AUC Score
 
@@ -131,78 +163,66 @@ Evaluation was performed on a held-out test set (20%).
 ROC-AUC: 0.652
 ```
 
-ROC-AUC was selected because the dataset is imbalanced and accuracy alone does not represent model performance well.
+ROC-AUC was selected as the main metric because the dataset is imbalanced.
+
+Accuracy alone may not represent performance correctly when one class has significantly fewer samples.
 
 ---
 
-## Classification Report
+# 📊 Evaluation Results
 
-The classification report evaluates the model performance for both classes.
+## ROC Curve
 
-| Class | Description | Precision | Recall | F1-score | Support |
-|------|-------------|-----------|--------|----------|---------|
-| **0** | Not readmitted within 30 days | 0.92 | 0.68 | 0.78 | 17,799 |
-| **1** | Readmitted within 30 days | 0.17 | 0.52 | 0.26 | 2,250 |
+![ROC Curve](screenshots/roc_curve.png)
 
-### Overall Performance
-
-| Metric | Score |
-|--------|-------|
-| Accuracy | 0.66 |
-| Macro Average F1-score | 0.52 |
-| Weighted Average F1-score | 0.72 |
-| ROC-AUC | 0.652 |
-
-### Interpretation
-
-- The model achieves strong performance on the majority class (**Class 0**).
-- Due to class imbalance, predicting readmission cases (**Class 1**) is more challenging.
-- Using `class_weight="balanced"` improves recall for readmitted patients, allowing the model to identify more potential high-risk cases.
-- ROC-AUC is used as the main evaluation metric because accuracy alone can be misleading for imbalanced classification problems.
-
----
 
 ## Confusion Matrix
 
-The confusion matrix shows how well the model distinguishes between patients who were readmitted within 30 days and those who were not.
-
-|                  | Predicted: No Readmission | Predicted: Readmission |
-|------------------|---------------------------|------------------------|
-| **Actual: No Readmission** | 12,158 (TN) | 5,641 (FP) |
-| **Actual: Readmission** | 1,081 (FN) | 1,169 (TP) |
+![Confusion Matrix](screenshots/confusion_matrix.png)
 
 
+## Classification Report
 
-Because this dataset is highly imbalanced, the model focuses on improving recall for the minority class (readmitted patients) rather than maximizing accuracy.
+![Classification Report](screenshots/classification_report.png)
 
 ---
 
 # 🔍 Model Explainability
 
-Feature importance is generated during training and saved as:
+Feature importance is extracted from the Random Forest model.
+
+The training process generates:
 
 ```
 models/feature_importance.csv
 ```
 
-The Streamlit application displays important features contributing to the Random Forest model.
+and visualization:
 
-Future improvements:
+![Feature Importance](screenshots/feature_importance.png)
 
-- SHAP explanations
+
+The feature importance shows which variables contributed most to the model's decision process.
+
+Future improvement:
+
+- SHAP explanation
+- Local prediction explanation
 - Feature contribution analysis
-- Local prediction explanations
 
 ---
 
 # 🖥️ Streamlit Application
 
-The deployed application provides:
+The trained model is deployed using Streamlit.
+
+Application features:
 
 ✅ Patient information input  
 ✅ Readmission probability prediction  
 ✅ Risk assessment visualization  
-✅ Model explainability dashboard  
+✅ Model explainability support  
+
 
 Demo:
 
@@ -212,7 +232,7 @@ https://hospital-readmission-prediction-kqdlipdjdbz4sj8yqnfb6p.streamlit.app/
 
 # 🛠️ Tech Stack
 
-## Programming
+## Programming Language
 
 - Python
 
@@ -227,6 +247,11 @@ https://hospital-readmission-prediction-kqdlipdjdbz4sj8yqnfb6p.streamlit.app/
 - Random Forest
 - Joblib
 
+## Visualization
+
+- Matplotlib
+- Seaborn
+
 ## Deployment
 
 - Streamlit
@@ -237,6 +262,7 @@ https://hospital-readmission-prediction-kqdlipdjdbz4sj8yqnfb6p.streamlit.app/
 
 ```
 hospital-readmission-prediction/
+
 │
 ├── app.py
 ├── train.py
@@ -251,25 +277,43 @@ hospital-readmission-prediction/
 │   └── feature_importance.csv
 │
 └── screenshots/
+    ├── confusion_matrix.png
+    ├── classification_report.png
+    ├── roc_curve.png
+    └── feature_importance.png
 ```
 
 ---
 
-# 🚀 How to Run Locally
+# 🚀 Installation & Usage
 
-Install dependencies:
+## 1. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Train model:
+---
+
+## 2. Train Model
 
 ```bash
 python train.py
 ```
 
-Run Streamlit:
+Generated files:
+
+```
+models/model_pipeline.pkl
+
+models/feature_importance.csv
+
+screenshots/*.png
+```
+
+---
+
+## 3. Run Streamlit
 
 ```bash
 streamlit run app.py
@@ -283,10 +327,10 @@ Possible improvements:
 
 - Hyperparameter optimization
 - Cross-validation
-- Threshold optimization
-- Compare with XGBoost / LightGBM
-- SHAP-based explainability
+- Threshold tuning
 - Model calibration
+- Compare with XGBoost / LightGBM
+- SHAP explainability
 - Better handling of class imbalance
 - Feature engineering
 
@@ -296,4 +340,6 @@ Possible improvements:
 
 Machine Learning Portfolio Project
 
-Built with Python, Scikit-Learn, and Streamlit.
+Built with:
+
+Python + Scikit-Learn + Streamlit
