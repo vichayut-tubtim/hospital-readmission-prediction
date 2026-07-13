@@ -20,4 +20,4 @@
 - Streamlit
 
 ## 🚀 Demo
-[คลิกที่นี่เพื่อทดลองใช้](#)
+[คลิกที่นี่เพื่อทดลองใช้](https://hospital-readmission-prediction-nkb356wrnxekyb4eipm2ww.streamlit.app/)
