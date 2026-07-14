@@ -344,7 +344,7 @@ streamlit run app.py
 
 ---
 
-## 📚 Model Limitations
+# 📚 Model Limitations
 
 - Dataset contains historical hospital records.
 - Model predicts readmission risk, not medical diagnosis.
