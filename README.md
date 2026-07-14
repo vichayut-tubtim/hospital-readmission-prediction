@@ -318,8 +318,6 @@ https://hospital-readmission-prediction-5uhxnegmwyy2i9a6xlsz2s.streamlit.app/
 pip install -r requirements.txt
 ```
 
----
-
 ## 2. Train Model
 
 ```bash
@@ -333,8 +331,6 @@ models/model_pipeline.pkl
 models/feature_importance.csv
 screenshots/*.png
 ```
-
----
 
 ## 3. Run Streamlit
 
