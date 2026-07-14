@@ -370,6 +370,6 @@ Possible improvements:
 
 # 👨‍💻 Author
 
-Machine Learning Portfolio Project
+Developed as a Machine Learning portfolio project.
 
 Built with: Python + Scikit-Learn + Streamlit
