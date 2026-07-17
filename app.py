@@ -236,9 +236,13 @@ if uploaded_file:
             result = raw_df.copy()
 
 
-            result["Readmission Probability"] = (
-                probs * 100
-            ).round(2).astype(str) + "%"
+            result["Readmission Probability"] = probs.astype(float)
+
+
+            result["Readmission Probability"] = pd.to_numeric(
+                result["Readmission Probability"],
+                errors="coerce"
+            )
 
 
             result["Risk"] = result[
@@ -250,7 +254,6 @@ if uploaded_file:
                 else
                 "✅ Low Risk"
             )
-
 
 
         st.success(
