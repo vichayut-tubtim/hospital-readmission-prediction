@@ -24,8 +24,9 @@ from sklearn.metrics import (
     PrecisionRecallDisplay
 )
 
-from catboost import CatBoostClassifier
 from src.feature_engineering import feature_engineering
+from catboost import CatBoostClassifier
+
 
 # ==========================================
 # Load Dataset

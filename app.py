@@ -2,8 +2,8 @@ import streamlit as st
 import pandas as pd
 import joblib
 import matplotlib.pyplot as plt
-
-from src.feature_engineering import feature_engineering
+import os
+from ml.src.feature_engineering import feature_engineering
 
 # =====================
 # Page Config
@@ -22,11 +22,18 @@ st.set_page_config(
 
 @st.cache_resource
 def load_model():
-
-    package = joblib.load(
-        "models/catboost_readmission.pkl"
+    BASE_DIR = os.path.dirname(
+        os.path.abspath(__file__)
     )
 
+
+    MODEL_PATH = os.path.join(
+        BASE_DIR,
+        "models/catboost_readmission.pkl"
+    )
+    
+    package = joblib.load(MODEL_PATH)
+    
     return (
         package["model"],
         package["threshold"]
@@ -144,13 +151,10 @@ if uploaded_file:
             probs = model.predict_proba(df)[:,1]
 
 
-            result = df.copy()
+            result = raw_df.copy()
 
 
-            result["Readmission Probability"] = (
-                probs
-            )
-
+            result["Readmission Probability"] = probs
 
             result["Risk"] = result[
                 "Readmission Probability"
@@ -173,13 +177,13 @@ if uploaded_file:
         )
 
 
+        display_cols = [
+            "Readmission Probability",
+            "Risk"
+        ]
+
         st.dataframe(
-            result[
-                [
-                    "Readmission Probability",
-                    "Risk"
-                ]
-            ],
+            result[display_cols],
             use_container_width=True
         )
 

@@ -5,4 +5,4 @@ scikit-learn==1.7.2
 joblib==1.5.3
 matplotlib
 seaborn
-catboost
+catboost==1.2.10
