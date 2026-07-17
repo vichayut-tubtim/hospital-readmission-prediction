@@ -372,7 +372,7 @@ Future improvements:
 - SHAP-based individual patient explanations
 - Risk factor visualization
 - Prediction explanation dashboard
-- 
+  
 ![Feature Importance](screenshots/feature_importance.png)
 
 ---
