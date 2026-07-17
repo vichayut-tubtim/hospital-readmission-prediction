@@ -456,7 +456,8 @@ joblib.dump(
     {
         "model": model,
         "threshold": best_threshold,
-        "features": list(X.columns)
+        "features": list(X.columns),
+        "cat_features": cat_features
     },
     "models/catboost_readmission.pkl"
 )

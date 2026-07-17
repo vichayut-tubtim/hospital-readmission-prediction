@@ -37,11 +37,12 @@ def load_model():
     return (
         package["model"],
         package["threshold"],
-        package["features"]
+        package["features"],
+        package["cat_features"]
     )
 
 
-model, threshold, feature_columns = load_model()
+model, threshold, feature_columns, cat_features = load_model()
 
 
 
@@ -128,10 +129,20 @@ if uploaded_file:
     df = feature_engineering(raw_df)
     
     for col in feature_columns:
+
         if col not in df.columns:
-            df[col] = 0
+            df[col] = "Unknown"
+
 
     df = df[feature_columns]
+
+
+    for col in cat_features:
+        df[col] = (
+            df[col]
+            .fillna("Unknown")
+            .astype(str)
+        )
 
 
     st.subheader(
