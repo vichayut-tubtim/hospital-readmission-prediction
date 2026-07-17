@@ -3,16 +3,19 @@ import pandas as pd
 import joblib
 import matplotlib.pyplot as plt
 import os
+
 from ml.src.feature_engineering import feature_engineering
 
-# =====================
-# Page Config
-# =====================
 
 st.set_page_config(
     page_title="Hospital Readmission Prediction",
     page_icon="🏥",
     layout="wide"
+)
+
+
+BASE_DIR = os.path.dirname(
+    os.path.abspath(__file__)
 )
 
 
@@ -22,24 +25,41 @@ st.set_page_config(
 
 @st.cache_resource
 def load_model():
-    BASE_DIR = os.path.dirname(
-        os.path.abspath(__file__)
-    )
-
 
     MODEL_PATH = os.path.join(
         BASE_DIR,
         "models/catboost_readmission.pkl"
     )
-    
-    package = joblib.load(MODEL_PATH)
-    
-    return (
-        package["model"],
-        package["threshold"],
-        package["features"],
-        package["cat_features"]
+
+    package = joblib.load(
+        MODEL_PATH
     )
+
+
+    model = package["model"]
+    threshold = package["threshold"]
+    features = package["features"]
+
+
+    cat_features = [
+        i
+        for i in model.get_cat_feature_indices()
+    ]
+
+
+    cat_columns = [
+        features[i]
+        for i in cat_features
+    ]
+
+
+    return (
+        model,
+        threshold,
+        features,
+        cat_columns
+    )
+
 
 
 model, threshold, feature_columns, cat_features = load_model()
@@ -53,9 +73,13 @@ model, threshold, feature_columns, cat_features = load_model()
 @st.cache_data
 def load_importance():
 
-    return pd.read_csv(
+    path = os.path.join(
+        BASE_DIR,
         "models/feature_importance.csv"
     )
+
+    return pd.read_csv(path)
+
 
 
 importance = load_importance()
@@ -70,11 +94,11 @@ st.title(
     "🏥 Hospital Readmission Prediction"
 )
 
+
 st.write(
     """
     Upload patient profiles and predict
-    the probability of diabetic patient
-    readmission within 30 days.
+    diabetic patient readmission risk within 30 days.
     """
 )
 
@@ -83,7 +107,6 @@ st.write(
 # =====================
 # Upload
 # =====================
-
 
 st.sidebar.header(
     "📂 Patient Data Upload"
@@ -98,21 +121,28 @@ uploaded_file = st.sidebar.file_uploader(
 
 
 # =====================
-# Sample Download
+# Sample CSV
 # =====================
 
-
-sample = pd.read_csv(
+sample_path = os.path.join(
+    BASE_DIR,
     "data/sample_patients.csv"
 )
 
 
-st.sidebar.download_button(
-    label="⬇️ Download Sample CSV",
-    data=sample.to_csv(index=False),
-    file_name="sample_patients.csv",
-    mime="text/csv"
-)
+if os.path.exists(sample_path):
+
+    sample = pd.read_csv(
+        sample_path
+    )
+
+
+    st.sidebar.download_button(
+        label="⬇️ Download Sample CSV",
+        data=sample.to_csv(index=False),
+        file_name="sample_patients.csv",
+        mime="text/csv"
+    )
 
 
 
@@ -120,29 +150,49 @@ st.sidebar.download_button(
 # Prediction
 # =====================
 
-
 if uploaded_file:
 
 
-    raw_df = pd.read_csv(uploaded_file)
+    raw_df = pd.read_csv(
+        uploaded_file
+    )
 
-    df = feature_engineering(raw_df)
-    
+
+    df = feature_engineering(
+        raw_df
+    )
+
+
+    # =====================
+    # Match Training Features
+    # =====================
+
     for col in feature_columns:
 
         if col not in df.columns:
-            df[col] = "Unknown"
+
+            if col in cat_features:
+                df[col] = "Unknown"
+
+            else:
+                df[col] = 0
 
 
-    df = df[feature_columns]
+
+    df = df[
+        feature_columns
+    ]
+
 
 
     for col in cat_features:
+
         df[col] = (
             df[col]
             .fillna("Unknown")
             .astype(str)
         )
+
 
 
     st.subheader(
@@ -151,7 +201,7 @@ if uploaded_file:
 
 
     st.dataframe(
-        df.head(),
+        raw_df.head(),
         use_container_width=True
     )
 
@@ -167,13 +217,18 @@ if uploaded_file:
         ):
 
 
-            probs = model.predict_proba(df)[:,1]
+            probs = (
+                model
+                .predict_proba(df)[:,1]
+            )
+
 
 
             result = raw_df.copy()
 
 
             result["Readmission Probability"] = probs
+
 
             result["Risk"] = result[
                 "Readmission Probability"
@@ -186,9 +241,11 @@ if uploaded_file:
             )
 
 
+
         st.success(
             "Prediction completed!"
         )
+
 
 
         st.subheader(
@@ -196,20 +253,29 @@ if uploaded_file:
         )
 
 
-        display_cols = [
-            "Readmission Probability",
-            "Risk"
-        ]
 
         st.dataframe(
-            result[display_cols],
+            result[
+                [
+                    "Readmission Probability",
+                    "Risk"
+                ]
+            ],
             use_container_width=True
         )
 
 
+
         st.metric(
             "High Risk Patients",
-            (result["Risk"]=="⚠️ High Risk").sum()
+            int(
+                (
+                    result["Risk"]
+                    ==
+                    "⚠️ High Risk"
+                )
+                .sum()
+            )
         )
 
 
@@ -217,27 +283,35 @@ if uploaded_file:
         st.divider()
 
 
+
         st.subheader(
             "📈 Risk Distribution"
         )
 
 
+
         fig, ax = plt.subplots()
+
 
         ax.hist(
             probs,
             bins=20
         )
 
+
         ax.set_xlabel(
             "Probability"
         )
+
 
         ax.set_ylabel(
             "Patients"
         )
 
-        st.pyplot(fig)
+
+        st.pyplot(
+            fig
+        )
 
 
 
@@ -253,7 +327,6 @@ else:
 # Explainability
 # =====================
 
-
 st.divider()
 
 
@@ -262,9 +335,13 @@ st.subheader(
 )
 
 
+
 top = importance.head(10)
 
 
+
 st.bar_chart(
-    top.set_index("Feature")
+    top.set_index(
+        "Feature"
+    )
 )

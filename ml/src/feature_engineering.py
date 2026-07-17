@@ -14,13 +14,21 @@ def feature_engineering(df):
     # ======================
 
     med_cols = [
-        "metformin", "repaglinide", "nateglinide",
-        "chlorpropamide", "glimepiride",
-        "acetohexamide", "glipizide",
-        "glyburide", "tolbutamide",
-        "pioglitazone", "rosiglitazone",
-        "acarbose", "miglitol",
-        "troglitazone", "tolazamide",
+        "metformin",
+        "repaglinide",
+        "nateglinide",
+        "chlorpropamide",
+        "glimepiride",
+        "acetohexamide",
+        "glipizide",
+        "glyburide",
+        "tolbutamide",
+        "pioglitazone",
+        "rosiglitazone",
+        "acarbose",
+        "miglitol",
+        "troglitazone",
+        "tolazamide",
         "insulin",
         "glyburide-metformin",
         "glipizide-metformin",
@@ -28,7 +36,6 @@ def feature_engineering(df):
         "metformin-rosiglitazone",
         "metformin-pioglitazone"
     ]
-
 
     med_cols = [
         c for c in med_cols
@@ -41,17 +48,16 @@ def feature_engineering(df):
         if pd.isna(x):
             return "Unknown"
 
-        if x=="No":
+        if x == "No":
             return "No"
 
-        if x=="Steady":
+        if x == "Steady":
             return "Steady"
 
         if x in ["Up","Down"]:
             return "Change"
 
         return x
-
 
 
     for col in med_cols:
@@ -61,18 +67,18 @@ def feature_engineering(df):
 
 
     df["diabetes_med_count"] = (
-        df[med_cols]!="No"
+        df[med_cols] != "No"
     ).sum(axis=1)
 
 
     df["total_changes"] = (
-        df[med_cols]=="Change"
+        df[med_cols] == "Change"
     ).sum(axis=1)
 
 
 
     # ======================
-    # Utilization
+    # Hospital Utilization
     # ======================
 
     df["total_visits"] = (
@@ -85,17 +91,16 @@ def feature_engineering(df):
 
 
     df["high_utilizer"] = (
-        df["number_inpatient"]>=2
+        df["number_inpatient"] >= 2
     ).astype(int)
-
 
 
     df["medication_complexity"] = (
         df["num_medications"].fillna(0)
         /
         (
-        df["time_in_hospital"].fillna(0)
-        +1
+            df["time_in_hospital"].fillna(0)
+            + 1
         )
     )
 
@@ -107,10 +112,10 @@ def feature_engineering(df):
     )
 
 
-
     high_risk_discharge = [
-        2,3,4,5,6,10,
-        12,14,22,23,24,25
+        2,3,4,5,6,
+        10,12,14,
+        22,23,24,25
     ]
 
 
@@ -120,13 +125,12 @@ def feature_engineering(df):
     ).astype(int)
 
 
-
     df["previous_admission_intensity"] = (
         df["number_inpatient"].fillna(0)
         /
         (
-        df["time_in_hospital"].fillna(0)
-        +1
+            df["time_in_hospital"].fillna(0)
+            +1
         )
     )
 
@@ -151,15 +155,18 @@ def feature_engineering(df):
 
 
     df["age_numeric"] = (
-        df["age"]
-        .map(age_map)
+        df["age"].map(age_map)
     )
 
 
     df["age_group"] = pd.cut(
         df["age_numeric"],
         bins=[
-            0,35,50,65,120
+            0,
+            35,
+            50,
+            65,
+            120
         ],
         labels=[
             "young",
@@ -172,13 +179,14 @@ def feature_engineering(df):
 
 
     # ======================
-    # A1C
+    # A1C / Glucose
     # ======================
+
 
     df["a1c_measured"] = (
         df["A1Cresult"]
         .fillna("None")
-        !="None"
+        != "None"
     ).astype(int)
 
 
@@ -186,7 +194,68 @@ def feature_engineering(df):
     df["glu_measured"] = (
         df["max_glu_serum"]
         .fillna("None")
-        !="None"
+        != "None"
+    ).astype(int)
+
+
+
+    def map_a1c(x):
+
+        if pd.isna(x) or x=="None":
+            return 0
+
+        if x=="Norm":
+            return 1
+
+        if x==">7":
+            return 2
+
+        if x==">8":
+            return 3
+
+        return 0
+
+
+
+    def map_glucose(x):
+
+        if pd.isna(x) or x=="None":
+            return 0
+
+        if x=="Norm":
+            return 1
+
+        if x==">200":
+            return 2
+
+        if x==">300":
+            return 3
+
+        return 0
+
+
+
+    df["a1c_level"] = (
+        df["A1Cresult"]
+        .apply(map_a1c)
+    )
+
+
+    df["glu_level"] = (
+        df["max_glu_serum"]
+        .apply(map_glucose)
+    )
+
+
+    df["a1c_high"] = (
+        df["A1Cresult"]
+        .isin([">7",">8"])
+    ).astype(int)
+
+
+    df["glu_high"] = (
+        df["max_glu_serum"]
+        .isin([">200",">300"])
     ).astype(int)
 
 
