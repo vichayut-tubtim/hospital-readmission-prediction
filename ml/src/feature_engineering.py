@@ -174,8 +174,7 @@ def feature_engineering(df):
             "senior",
             "elderly"
         ]
-    )
-
+    ).astype(object)
 
 
     # ======================

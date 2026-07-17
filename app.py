@@ -184,14 +184,23 @@ if uploaded_file:
     ]
 
 
-
     for col in cat_features:
 
-        df[col] = (
-            df[col]
-            .fillna("Unknown")
-            .astype(str)
-        )
+        if col in df.columns:
+
+            if str(df[col].dtype) == "category":
+                df[col] = (
+                    df[col]
+                    .astype(object)
+                    .fillna("Unknown")
+                )
+
+            else:
+                df[col] = (
+                    df[col]
+                    .fillna("Unknown")
+                    .astype(str)
+                )
 
 
 
