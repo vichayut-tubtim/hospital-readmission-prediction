@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-import joblib
+import requests
 
 
 # =====================
@@ -13,21 +13,6 @@ st.set_page_config(
     page_icon="🏥",
     layout="wide"
 )
-
-
-# =====================
-# Load Model
-# =====================
-
-@st.cache_resource
-def load_model():
-
-    return joblib.load(
-        "models/model_pipeline.pkl"
-    )
-
-
-model = load_model()
 
 
 
