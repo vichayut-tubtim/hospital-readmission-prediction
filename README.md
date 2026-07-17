@@ -149,7 +149,6 @@ The test set was only used once for final evaluation.
 
 This prevents information from the test distribution being accidentally used during training.
 
----
 
 ## Missing Value Handling
 
@@ -300,8 +299,6 @@ Performance:
 |---|---:|
 | Recall | 0.703 |
 | Precision | 0.079 |
-
----
 
 ## 2. Capacity-Based Decision
 
