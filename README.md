@@ -1,14 +1,15 @@
 # 🏥 Hospital Readmission Prediction
 
-Machine Learning project for predicting the probability of diabetic patient readmission within 30 days after hospital discharge.
+Machine Learning project for predicting the risk of diabetic patient readmission within 30 days after hospital discharge.
 
-This project demonstrates an end-to-end Machine Learning workflow:
+This project covers an end-to-end Machine Learning workflow:
 
-- Data preprocessing
+- Data preprocessing with leakage prevention
 - Feature engineering
-- Model training
+- CatBoost model training
+- Threshold selection
 - Model evaluation
-- Model explainability
+- Feature importance analysis
 - Streamlit deployment
 
 > ⚠️ Educational project only. This system is not intended for clinical decision-making.
@@ -17,17 +18,17 @@ This project demonstrates an end-to-end Machine Learning workflow:
 
 # 🎯 Problem Statement
 
-Hospital readmissions create additional healthcare costs and may indicate potential gaps in patient care.
+Hospital readmission is an important healthcare challenge because it increases costs and may indicate that some patients require additional support after discharge.
 
-The goal of this project is to build a classification model that estimates the likelihood of diabetic patients being readmitted within 30 days after discharge.
+The goal of this project is to build a Machine Learning model that identifies diabetic patients with a higher risk of readmission within 30 days.
 
-The prediction can help identify higher-risk cases that may require additional follow-up attention.
+The model produces a risk score that can be used to rank patients and prioritize follow-up resources.
 
 ---
 
 # 📊 Dataset
 
-**UCI Diabetes 130-US Hospitals Dataset**
+## UCI Diabetes 130-US Hospitals Dataset
 
 Dataset information:
 
@@ -35,14 +36,34 @@ Dataset information:
 - 50 original features
 - Data collected from 130 US hospitals
 
-Target:
+## Data Cleaning
+
+The original dataset contains multiple encounters from the same patient. To avoid duplicated patient history affecting the evaluation, only the latest encounter per patient was kept.
+
+Additional filtering was applied:
+
+| Step | Rows Removed | Rows Remaining |
+|---|---:|---:|
+| Original dataset | - | 101,766 |
+| Keep latest encounter per patient (`patient_nbr`) | - | Deduplicated |
+| Remove hospice and expired discharge cases | 2,349 | 69,169 |
+
+Patients with hospice or expired discharge records were removed because these cases cannot have future readmission events. Including them as negative samples would create misleading labels.
+
+## Target
 
 | Label | Meaning |
 |---|---|
 | 1 | Readmitted within 30 days (`<30`) |
-| 0 | Not readmitted within 30 days |
+| 0 | Not readmitted within 30 days (`NO` or `>30`) |
 
-The dataset is highly imbalanced, with fewer positive readmission cases.
+Final positive rate:
+
+```
+4.62%
+```
+
+This creates a highly imbalanced classification problem.
 
 ---
 
@@ -50,9 +71,7 @@ The dataset is highly imbalanced, with fewer positive readmission cases.
 
 ```
 hospital-readmission-prediction/
-│
-├── .devcontainer/
-│   └── devcontainer.json
+
 │
 ├── app.py
 ├── train.py
@@ -60,14 +79,12 @@ hospital-readmission-prediction/
 ├── runtime.txt
 ├── README.md
 ├── .gitignore
-├── .python-version
-├── .gitattributes
 │
 ├── data/
 │   └── diabetic_data.csv
 │
 ├── models/
-│   ├── model_pipeline.pkl
+│   ├── catboost_readmission.pkl
 │   └── feature_importance.csv
 │
 ├── notebooks/
@@ -75,9 +92,10 @@ hospital-readmission-prediction/
 │
 └── screenshots/
     ├── confusion_matrix.png
-    ├── classification_report.png
     ├── roc_curve.png
-    └── feature_importance.png
+    ├── precision_recall_curve.png
+    ├── feature_importance.png
+    └── capacity_recall_curve.png
 ```
 
 ---
@@ -88,125 +106,225 @@ hospital-readmission-prediction/
                  Dataset
                     |
                     v
-            Data Cleaning
+          Data Cleaning
+   (patient deduplication and filtering)
                     |
                     v
-        Missing Value Handling
+        Train / Validation / Test Split
                     |
                     v
-    Feature Encoding & Transformation
+       Feature Engineering
+   (train-only category grouping)
                     |
                     v
-          Random Forest Model
+          CatBoost Model
                     |
                     v
-             Saved Pipeline
-          (model_pipeline.pkl)
+      Threshold Selection
+ (F2 optimization + capacity analysis)
                     |
                     v
-             Streamlit App
+          Saved Pipeline
                     |
-          +---------+---------+
-          |                   |
-          v                   v
- Prediction Result     Model Explainability
- (Risk Probability)    (Feature Importance)
+                    v
+        Streamlit Application
 ```
 
 ---
 
 # 🔄 Data Preprocessing
 
-The following preprocessing steps were applied:
+## Leakage Prevention
 
-## Removed high missing-value columns
+Preventing data leakage was an important part of this project.
 
-Removed:
+The dataset was split into train, validation, and test sets before applying any data-driven transformations.
 
-- `weight`
-- `medical_specialty`
-- `payer_code`
+The following steps were fitted only on the training set:
+
+- Diagnosis code grouping (`diag_1`, `diag_2`, `diag_3`)
+- Medical specialty grouping
+- Category frequency analysis
+
+The same transformations were then applied to validation and test sets.
+
+The test set was only used once for final evaluation.
+
+This prevents information from the test distribution being accidentally used during training.
+
+---
 
 ## Missing Value Handling
 
-- Replace missing race values (`?`) with `Unknown`
-- Remove records with missing diagnosis codes
+Preprocessing steps:
 
-Removed rows containing:
+- Replace `?` values with missing values
+- Keep missing diagnosis values and group them into `"Other"`
+- Remove columns with excessive missing values:
+  - `weight`
+  - `payer_code`
+- Remove low-information features:
+  - `examide`
+  - `citoglipton`
 
-- `diag_1 = ?`
-- `diag_2 = ?`
-- `diag_3 = ?`
-
-## Removed Identifier Features
-
-Removed:
+Removed identifier features:
 
 - `encounter_id`
 - `patient_nbr`
-
-## Feature Transformation
-
-### Numerical Features
-
-Pipeline:
-
-```
-Median Imputation
-```
-
-### Categorical Features
-
-Pipeline:
-
-```
-Most Frequent Imputation
-        |
-        v
-One-Hot Encoding
-(handle_unknown="ignore")
-```
 
 ---
 
 # 🤖 Machine Learning Model
 
-## Random Forest Classifier
+## CatBoost Classifier
 
 Model configuration:
 
 ```
-n_estimators = 300
-max_depth = 15
-min_samples_split = 20
-class_weight = balanced
-random_state = 42
+iterations = 4000
+depth = 6
+learning_rate = 0.02
+loss_function = Logloss
+eval_metric = AUC
+boosting_type = Ordered
+l2_leaf_reg = 10
+auto_class_weights = Balanced
+early_stopping = 200 rounds
 ```
 
-The model outputs:
+## Why CatBoost?
 
-- Readmission probability
-- Risk classification based on prediction threshold
+The dataset contains many categorical features, including diagnosis codes and hospital-related information.
+
+CatBoost was selected because:
+
+- It supports categorical features directly
+- It handles high-cardinality categories well
+- It reduces the need for manual encoding
+- It works effectively with missing categorical values
+
+---
+
+# ⚠️ Risk Score Interpretation
+
+The model output should be interpreted as a risk score, not a calibrated probability.
+
+Because the dataset is highly imbalanced, `auto_class_weights="Balanced"` was used to improve minority class detection.
+
+This changes the model output distribution.
+
+Example:
+
+```
+Risk score = 0.7
+```
+
+does not mean:
+
+```
+70% probability of readmission
+```
+
+The score is mainly used to rank patients from higher to lower risk.
+
+If accurate probability estimation is required, calibration methods such as:
+
+- Platt Scaling
+- Isotonic Regression
+
+should be applied and evaluated.
 
 ---
 
 # 📈 Model Performance
 
-Evaluation was performed using a test set (20%).
+The final evaluation was performed on a held-out test set.
 
-## ROC-AUC Score
+| Metric | Score |
+|---|---:|
+| ROC-AUC | 0.716 |
+| PR-AUC | 0.121 |
+| Recall | 0.703 |
+| Precision | 0.079 |
+| F1 Score | 0.142 |
+| F2 Score | 0.267 |
+
+Because the positive class only represents 4.62% of the dataset, accuracy is not a suitable main metric.
+
+A model that predicts every patient as "not readmitted" could achieve high accuracy while failing to identify any high-risk patients.
+
+For this reason, this project focuses on:
+
+- PR-AUC
+- Recall
+- F2 Score
+
+as the main evaluation metrics.
+
+## PR-AUC Comparison
+
+The baseline PR-AUC is approximately equal to the positive class rate:
 
 ```
-ROC-AUC: 0.652
+Random baseline ≈ 0.046
 ```
 
-The performance is affected by several factors:
+The model achieved:
 
-- The dataset is highly imbalanced, with fewer positive readmission cases.
-- Patient readmission depends on complex clinical factors that may not be fully represented by available features.
-- Random Forest provides a strong baseline, but gradient boosting models may improve performance.
+```
+PR-AUC = 0.121
+```
 
-Accuracy alone may not represent performance correctly when one class has significantly fewer samples.
+which is around 2.6 times better than random selection.
+
+---
+
+# 🎯 Threshold Selection & Capacity Analysis
+
+Choosing a classification threshold is important because the cost of missing a high-risk patient can be different from the cost of unnecessary follow-up.
+
+This project evaluates threshold selection from two perspectives.
+
+## 1. Recall-Oriented Threshold
+
+Since the goal is to identify more potential readmission cases, F2-score was used instead of F1-score.
+
+F2 gives more importance to recall.
+
+Selected threshold:
+
+```
+0.46
+```
+
+Performance:
+
+| Metric | Score |
+|---|---:|
+| Recall | 0.703 |
+| Precision | 0.079 |
+
+---
+
+## 2. Capacity-Based Decision
+
+In real healthcare settings, follow-up resources are limited.
+
+Instead of selecting patients only based on a metric, the model was also evaluated by selecting the highest-risk patients within different capacity limits.
+
+| Capacity | Patients Flagged | Recall | Precision |
+|---|---:|---:|---:|
+| 5% | 5.0% | 0.184 | 0.172 |
+| 10% | 9.6% | 0.286 | 0.138 |
+| 15% | 13.8% | 0.353 | 0.119 |
+| 20% | 18.8% | 0.445 | 0.110 |
+| 25% | 23.5% | 0.508 | 0.100 |
+| 30% | 28.3% | 0.561 | 0.092 |
+| 40% | 38.0% | 0.669 | 0.081 |
+
+The best operating point depends on available follow-up capacity and the cost of intervention.
+
+![Capacity Recall Curve](screenshots/capacity_recall_curve.png)
 
 ---
 
@@ -216,40 +334,49 @@ Accuracy alone may not represent performance correctly when one class has signif
 
 ![ROC Curve](screenshots/roc_curve.png)
 
+## Precision-Recall Curve
 
-## Confusion Matrix
+![Precision Recall Curve](screenshots/precision_recall_curve.png)
+
+The Precision-Recall curve provides a better view of performance because the dataset contains a small number of positive cases.
 
 ![Confusion Matrix](screenshots/confusion_matrix.png)
 
+## Confusion Matrix
 
-## Classification Report
-
-![Classification Report](screenshots/classification_report.png)
+The confusion matrix above is calculated using the F2-optimal threshold.
 
 ---
 
 # 🔍 Model Explainability
 
-Feature importance is extracted from the Random Forest model.
+Feature importance was extracted from the trained CatBoost model.
 
-The training process generates:
+Generated file:
 
 ```
 models/feature_importance.csv
 ```
 
-and visualization:
+Important features include:
+
+- `admission_type_id`
+- `discharge_disposition_id`
+- `total_visits`
+- `discharge_high_risk`
+- `number_diagnoses`
+
+These features are related to previous healthcare utilization and discharge conditions.
+
+Feature importance shows which features influence the model's prediction, but it does not indicate causation.
+
+Future improvements:
+
+- SHAP global explanation
+- Individual patient explanation
+- Prediction reason visualization
 
 ![Feature Importance](screenshots/feature_importance.png)
-
-
-The feature importance shows which variables contributed most to the model's decision process.
-
-Future improvement:
-
-- SHAP explanation
-- Local prediction explanation
-- Feature contribution analysis
 
 ---
 
@@ -260,25 +387,21 @@ The trained model is deployed using Streamlit.
 Application features:
 
 ✅ Patient information input  
-✅ Readmission probability prediction  
-✅ Risk assessment visualization  
-✅ Model explainability support  
+✅ Readmission risk score prediction  
+✅ Risk level visualization  
+✅ Feature importance display  
 
-The Streamlit application restricts user inputs within the observed training ranges using UI constraints such as sliders and dropdowns.
-
-Categorical features are handled with OneHotEncoder(handle_unknown="ignore"), allowing unseen categories without crashing the pipeline.
-
-## Demo Screenshot
-
-![Streamlit Demo](screenshots/demo1.png)
-![Streamlit Demo](screenshots/demo2.png)
-![Streamlit Demo](screenshots/demo3.png)
-![Streamlit Demo](screenshots/demo4.png)
-![Streamlit Demo](screenshots/demo5.png)
-
-Demo:
+## Demo
 
 https://hospital-readmission-prediction-5uhxnegmwyy2i9a6xlsz2s.streamlit.app/
+
+## Screenshots
+
+![Streamlit Demo](screenshots/demo1.png)
+
+![Streamlit Demo](screenshots/demo2.png)
+
+![Streamlit Demo](screenshots/demo3.png)
 
 ---
 
@@ -295,8 +418,8 @@ https://hospital-readmission-prediction-5uhxnegmwyy2i9a6xlsz2s.streamlit.app/
 
 ## Machine Learning
 
+- CatBoost
 - Scikit-Learn
-- Random Forest
 - Joblib
 
 ## Visualization
@@ -312,13 +435,11 @@ https://hospital-readmission-prediction-5uhxnegmwyy2i9a6xlsz2s.streamlit.app/
 
 # 🚀 Installation & Usage
 
-## 1. Install dependencies
+## 1. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
-
----
 
 ## 2. Train Model
 
@@ -329,14 +450,14 @@ python train.py
 Generated files:
 
 ```
-models/model_pipeline.pkl
-models/feature_importance.csv
-screenshots/*.png
+models/
+├── catboost_readmission.pkl
+└── feature_importance.csv
+
+screenshots/
 ```
 
----
-
-## 3. Run Streamlit
+## 3. Run Streamlit Application
 
 ```bash
 streamlit run app.py
@@ -344,12 +465,17 @@ streamlit run app.py
 
 ---
 
-## 📚 Model Limitations
+# 📚 Limitations
 
-- Dataset contains historical hospital records.
-- Model predicts readmission risk, not medical diagnosis.
-- Feature importance indicates model decision influence, not causation.
-- Model performance may vary across different hospitals and patient populations.
+This project has several limitations:
+
+- The dataset contains historical hospital records and may not represent current healthcare practices.
+- Model performance may change when applied to different hospitals.
+- The model output is a risk score, not a medical diagnosis.
+- Feature importance represents model behavior, not direct clinical relationships.
+- Precision is limited because readmission cases are rare.
+
+The model should be used as a support tool for prioritization, not as a replacement for healthcare professionals.
 
 ---
 
@@ -357,19 +483,19 @@ streamlit run app.py
 
 Possible improvements:
 
-- Hyperparameter optimization
-- Cross-validation
-- Threshold tuning
-- Model calibration
-- Compare with XGBoost / LightGBM
-- SHAP explainability
-- Better handling of class imbalance
-- Feature engineering
+- Add SHAP for better model explainability
+- Apply probability calibration with reliability evaluation
+- Add cost-based threshold optimization
+- Compare performance with LightGBM
+- Implement model monitoring for data drift
+- Create an inference API wrapper
 
 ---
 
 # 👨‍💻 Author
 
-Machine Learning Portfolio Project
+Machine Learning portfolio project.
 
-Built with: Python + Scikit-Learn + Streamlit
+Built with:
+
+Python + CatBoost + Scikit-Learn + Streamlit
