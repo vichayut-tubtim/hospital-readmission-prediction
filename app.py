@@ -97,11 +97,13 @@ st.title(
 
 st.write(
     """
-    Upload patient profiles and predict
-    diabetic patient readmission risk within 30 days.
+    Upload patient profiles and estimate
+    30-day readmission risk score for diabetic patients.
+
+    The score is used for patient risk ranking and
+    follow-up prioritization, not as a clinical diagnosis.
     """
 )
-
 
 
 # =====================
@@ -217,114 +219,120 @@ if uploaded_file:
 
 
     if st.button(
-        "🔍 Predict Readmission Risk"
+        "🔍 Predict Readmission Risk Score"
     ):
-
 
         with st.spinner(
             "Analyzing patients..."
         ):
 
-
-            probs = (
+            risk_scores = (
                 model
-                .predict_proba(df)[:,1]
+                .predict_proba(df)[:, 1]
             )
-
 
 
             result = raw_df.copy()
 
 
-            result["Readmission Probability"] = probs.astype(float)
+            # Risk Score (not probability)
+            result["Readmission Risk Score"] = risk_scores.astype(float)
 
 
-            result["Readmission Probability"] = pd.to_numeric(
-                result["Readmission Probability"],
+            result["Readmission Risk Score"] = pd.to_numeric(
+                result["Readmission Risk Score"],
                 errors="coerce"
-            )
+            ).fillna(0)
 
 
-            result["Risk"] = result[
-                "Readmission Probability"
+            result["Risk Level"] = result[
+                "Readmission Risk Score"
             ].apply(
                 lambda x:
                 "⚠️ High Risk"
                 if x >= threshold
                 else
-                "✅ Low Risk"
+                "🟢 Lower Risk"
             )
 
 
         st.success(
-            "Prediction completed!"
+            "Risk assessment completed!"
         )
-
 
 
         st.subheader(
-            "📊 Prediction Result"
+            "📊 Risk Stratification Result"
         )
-
 
 
         st.dataframe(
             result[
                 [
-                    "Readmission Probability",
-                    "Risk"
+                    "Readmission Risk Score",
+                    "Risk Level"
                 ]
             ],
             use_container_width=True
         )
 
 
+        st.caption(
+            f"High Risk threshold: {threshold:.2f}. "
+            "Higher scores indicate higher priority for follow-up review. "
+            "This score is a ranking score, not a calibrated probability."
+        )
 
-        st.metric(
-            "High Risk Patients",
-            int(
-                (
-                    result["Risk"]
-                    ==
-                    "⚠️ High Risk"
+
+        col1, col2, col3 = st.columns(3)
+
+
+        with col1:
+            st.metric(
+                "⚠️ High Risk Patients",
+                int(
+                    (
+                        result["Risk Level"]
+                        ==
+                        "⚠️ High Risk"
+                    ).sum()
                 )
-                .sum()
             )
-        )
-        
-        st.metric(
-            "Average Risk",
-            f"{probs.mean()*100:.2f}%"
-        )
 
-        st.metric(
-            "Highest Risk",
-            f"{probs.max()*100:.2f}%"
-        )
 
+        with col2:
+            st.metric(
+                "Average Risk Score",
+                f"{risk_scores.mean():.3f}"
+            )
+
+
+        with col3:
+            st.metric(
+                "Highest Risk Score",
+                f"{risk_scores.max():.3f}"
+            )
 
 
         st.divider()
 
 
-
         st.subheader(
-            "📈 Risk Distribution"
+            "📈 Risk Score Distribution"
         )
-
 
 
         fig, ax = plt.subplots()
 
 
         ax.hist(
-            probs,
+            risk_scores,
             bins=20
         )
 
 
         ax.set_xlabel(
-            "Probability"
+            "Risk Score"
         )
 
 
