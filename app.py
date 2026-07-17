@@ -91,7 +91,7 @@ importance = load_importance()
 # =====================
 
 st.title(
-    "🏥 Hospital Readmission Prediction"
+    "🏥 Hospital Readmission Risk Stratification"
 )
 
 
