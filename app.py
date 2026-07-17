@@ -36,11 +36,12 @@ def load_model():
     
     return (
         package["model"],
-        package["threshold"]
+        package["threshold"],
+        package["features"]
     )
 
 
-model, threshold = load_model()
+model, threshold, feature_columns = load_model()
 
 
 
@@ -125,6 +126,13 @@ if uploaded_file:
     raw_df = pd.read_csv(uploaded_file)
 
     df = feature_engineering(raw_df)
+    
+    for col in feature_columns:
+        if col not in df.columns:
+            df[col] = 0
+
+    df = df[feature_columns]
+
 
     st.subheader(
         "👥 Uploaded Patients"
