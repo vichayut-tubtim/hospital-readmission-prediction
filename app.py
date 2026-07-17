@@ -3,6 +3,7 @@ import pandas as pd
 import joblib
 import matplotlib.pyplot as plt
 
+from src.feature_engineering import feature_engineering
 
 # =====================
 # Page Config
@@ -114,10 +115,9 @@ st.sidebar.download_button(
 if uploaded_file:
 
 
-    df = pd.read_csv(
-        uploaded_file
-    )
+    raw_df = pd.read_csv(uploaded_file)
 
+    df = feature_engineering(raw_df)
 
     st.subheader(
         "👥 Uploaded Patients"
