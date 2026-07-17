@@ -1,6 +1,7 @@
-# 🏥 Hospital Readmission Prediction
+# 🏥 Hospital Readmission Risk Stratification
 
-Machine Learning project for predicting the risk of diabetic patient readmission within 30 days after hospital discharge.
+Machine Learning project for estimating 30-day readmission risk scores for diabetic patients after hospital discharge.
+The system ranks patients based on their predicted risk level and helps prioritize follow-up resources.
 
 This project covers an end-to-end Machine Learning workflow:
 
@@ -20,9 +21,9 @@ This project covers an end-to-end Machine Learning workflow:
 
 Hospital readmission is an important healthcare challenge because it increases costs and may indicate that some patients require additional support after discharge.
 
-The goal of this project is to build a Machine Learning model that identifies diabetic patients with a higher risk of readmission within 30 days.
+The goal of this project is to build a Machine Learning model that identifies diabetic patients with higher risk of readmission within 30 days.
 
-The model produces a risk score that can be used to rank patients and prioritize follow-up resources.
+The model produces a risk score that is used to rank patients from higher to lower risk and support follow-up prioritization.
 
 ---
 
@@ -70,8 +71,7 @@ This creates a highly imbalanced classification problem.
 # 📂 Project Structure
 
 ```
-hospital-readmission-prediction/
-
+hospital-readmission-risk-stratification/
 │
 ├── app.py
 ├── train.py
@@ -103,31 +103,28 @@ hospital-readmission-prediction/
 # 🏗️ System Architecture
 
 ```
-                 Dataset
-                    |
-                    v
+             Patient Dataset
+                   |
+                   v
           Data Cleaning
-   (patient deduplication and filtering)
-                    |
-                    v
-        Train / Validation / Test Split
-                    |
-                    v
+                   |
+                   v
+    Train / Validation / Test Split
+                   |
+                   v
        Feature Engineering
-   (train-only category grouping)
-                    |
-                    v
-          CatBoost Model
-                    |
-                    v
-      Threshold Selection
- (F2 optimization + capacity analysis)
-                    |
-                    v
-          Saved Pipeline
-                    |
-                    v
-        Streamlit Application
+                   |
+                   v
+         CatBoost Classifier
+                   |
+                   v
+      Risk Score Generation
+                   |
+                   v
+  Threshold Selection (F2 Optimization)
+                   |
+                   v
+         Streamlit Application
 ```
 
 ---
@@ -285,9 +282,9 @@ Choosing a classification threshold is important because the cost of missing a h
 
 This project evaluates threshold selection from two perspectives.
 
-## 1. Recall-Oriented Threshold
+## 1. Recall-Oriented Risk Identification
 
-Since the goal is to identify more potential readmission cases, F2-score was used instead of F1-score.
+Since missing a potentially high-risk patient can be more costly than additional follow-up reviews, F2-score was used instead of F1-score.
 
 F2 gives more importance to recall.
 
@@ -372,10 +369,10 @@ Feature importance shows which features influence the model's prediction, but it
 
 Future improvements:
 
-- SHAP global explanation
-- Individual patient explanation
-- Prediction reason visualization
-
+- SHAP-based individual patient explanations
+- Risk factor visualization
+- Prediction explanation dashboard
+- 
 ![Feature Importance](screenshots/feature_importance.png)
 
 ---
@@ -386,10 +383,11 @@ The trained model is deployed using Streamlit.
 
 Application features:
 
-- Patient information input  
-- Readmission risk score prediction  
-- Risk level visualization  
-- Feature importance display  
+- Upload patient profiles through CSV
+- 30-day readmission risk score estimation
+- High-risk patient identification
+- Risk score distribution visualization
+- Feature importance analysis
 
 ## Demo
 
@@ -471,7 +469,7 @@ This project has several limitations:
 
 - The dataset contains historical hospital records and may not represent current healthcare practices.
 - Model performance may change when applied to different hospitals.
-- The model output is a risk score, not a medical diagnosis.
+- The model output is a risk ranking score, not a calibrated probability or medical diagnosis.
 - Feature importance represents model behavior, not direct clinical relationships.
 - Precision is limited because readmission cases are rare.
 
@@ -484,7 +482,7 @@ The model should be used as a support tool for prioritization, not as a replacem
 Possible improvements:
 
 - Add SHAP for better model explainability
-- Apply probability calibration with reliability evaluation
+- Apply probability calibration to convert risk scores into reliable probability estimates
 - Add cost-based threshold optimization
 - Compare performance with LightGBM
 - Implement model monitoring for data drift
