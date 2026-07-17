@@ -1,11 +1,6 @@
 encounter_id,patient_nbr,race,gender,age,weight,admission_type_id,discharge_disposition_id,admission_source_id,time_in_hospital,payer_code,medical_specialty,num_lab_procedures,num_procedures,num_medications,number_outpatient,number_emergency,number_inpatient,diag_1,diag_2,diag_3,number_diagnoses,max_glu_serum,A1Cresult,metformin,repaglinide,nateglinide,chlorpropamide,glimepiride,acetohexamide,glipizide,glyburide,tolbutamide,pioglitazone,rosiglitazone,acarbose,miglitol,troglitazone,tolazamide,examide,citoglipton,insulin,glyburide-metformin,glipizide-metformin,glimepiride-pioglitazone,metformin-rosiglitazone,metformin-pioglitazone,change,diabetesMed
-110939484,19274094,Caucasian,Female,[70-80),?,1,1,6,11,UN,InternalMedicine,68,0,20,0,0,0,250.8,599,263,5,,,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,Steady,No,No,No,No,No,No,Yes
-170328306,65634327,Caucasian,Male,[50-60),?,1,1,1,1,HM,?,20,0,7,0,0,0,780,427,E941,8,,,Steady,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,Yes
-245688426,100657359,Caucasian,Female,[60-70),?,3,6,1,4,HM,?,21,3,23,1,0,2,715,733,724,7,,,Steady,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,Yes
-150826224,83144448,Caucasian,Male,[30-40),?,2,1,1,12,CP,Gastroenterology,28,0,19,0,0,1,494,277,117,7,,,No,No,No,No,No,No,No,No,No,Steady,No,No,No,No,No,No,No,No,No,No,No,No,No,No,Yes
-135993852,65234214,AfricanAmerican,Female,[60-70),?,1,2,7,1,?,?,21,0,6,0,0,0,403,584,428,7,,,No,No,No,No,No,No,Steady,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,Yes
-26013480,18137880,Caucasian,Male,[80-90),?,3,1,1,7,?,?,42,2,27,0,0,0,162,250,?,2,,,Steady,No,No,No,No,No,No,No,No,No,Steady,No,No,No,No,No,No,No,No,No,No,No,No,Ch,Yes
-97343778,24157764,AfricanAmerican,Female,[70-80),?,1,1,7,6,?,Nephrology,43,2,17,0,0,0,531,250.41,403,5,,,No,No,No,No,No,No,Steady,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,Yes
-266753892,67887900,Caucasian,Female,[40-50),?,1,6,7,5,MC,?,55,0,20,1,1,0,820,70,276,9,,>8,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,Up,No,No,No,No,No,Ch,Yes
-167353710,24197877,Caucasian,Male,[80-90),?,1,3,7,5,MC,InternalMedicine,50,0,26,0,0,0,486,453,255,5,,,No,No,No,No,Up,No,No,No,No,No,No,No,No,No,No,No,No,Up,No,No,No,No,No,Ch,Yes
-162658824,62732466,AfricanAmerican,Female,[60-70),?,1,6,7,7,?,?,61,0,6,0,0,1,250.8,414,294,5,,Norm,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No
+1,10001,Caucasian,Female,[80-90),?,1,11,7,12,MC,InternalMedicine,70,2,35,5,3,6,428,250.8,276,9,>300,>8,Steady,No,No,No,Steady,No,Steady,No,No,No,No,No,No,No,No,No,Up,No,No,No,No,No,Ch,Yes
+2,10002,AfricanAmerican,Male,[70-80),?,2,12,7,9,MC,Cardiology,65,1,30,4,2,4,410,250.7,401,8,>200,>7,Steady,No,No,No,No,No,Steady,No,No,No,No,No,No,No,No,No,No,Steady,No,No,No,No,No,Ch,Yes
+3,10003,Caucasian,Female,[60-70),?,1,1,1,3,HM,InternalMedicine,40,0,15,0,0,0,250,401,414,5,Norm,Norm,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,Steady,No,No,No,No,No,No,Yes
+4,10004,Caucasian,Male,[50-60),?,1,1,7,2,HM,Surgery,35,0,10,0,0,0,715,733,250,4,,,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,Yes
+5,10005,AfricanAmerican,Female,[80-90),?,3,14,7,14,MC,Nephrology,80,3,40,6,4,8,428,584,585,10,>300,>8,Steady,No,No,No,Up,No,Steady,No,No,No,No,No,No,No,No,No,No,Up,No,No,No,No,No,Ch,Yes

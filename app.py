@@ -236,7 +236,9 @@ if uploaded_file:
             result = raw_df.copy()
 
 
-            result["Readmission Probability"] = probs
+            result["Readmission Probability"] = (
+                probs * 100
+            ).round(2).astype(str) + "%"
 
 
             result["Risk"] = result[
@@ -285,6 +287,16 @@ if uploaded_file:
                 )
                 .sum()
             )
+        )
+        
+        st.metric(
+            "Average Risk",
+            f"{probs.mean()*100:.2f}%"
+        )
+
+        st.metric(
+            "Highest Risk",
+            f"{probs.max()*100:.2f}%"
         )
 
 
