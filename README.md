@@ -386,10 +386,10 @@ The trained model is deployed using Streamlit.
 
 Application features:
 
-✅ Patient information input  
-✅ Readmission risk score prediction  
-✅ Risk level visualization  
-✅ Feature importance display  
+- Patient information input  
+- Readmission risk score prediction  
+- Risk level visualization  
+- Feature importance display  
 
 ## Demo
 
