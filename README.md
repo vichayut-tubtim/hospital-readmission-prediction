@@ -168,6 +168,24 @@ Removed identifier features:
 - `encounter_id`
 - `patient_nbr`
 
+## Data Splitting
+
+The dataset was split into train, validation, and test sets before any 
+data-driven transformation was applied (see Leakage Prevention above). 
+Split was stratified on the target label to preserve the 4.62% positive 
+rate across all three sets.
+
+| Split | Ratio | Purpose |
+|---|---:|---|
+| Train | 64% | Model fitting |
+| Validation | 16% | Early stopping, threshold selection |
+| Test | 20% | Final evaluation (touched once) |
+
+Because the positive class is rare, validation still contains roughly 
+500 positive cases, used for both threshold optimization and capacity-based 
+cutoffs.
+
+
 ---
 
 # 🤖 Machine Learning Model
