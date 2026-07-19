@@ -117,22 +117,24 @@ print("Test:", X_test.shape)
 # ==========================================
 # Diagnosis grouping — fit on TRAIN only
 # ==========================================
+# NaN must be filled BEFORE .astype(str), otherwise real missing values
+# become the literal string "nan" and are treated as their own category
+# instead of being folded into "Other" as intended.
 
 diag_top_codes = {}
 
 for col in ["diag_1", "diag_2", "diag_3"]:
-    X_train[col] = X_train[col].astype(str)
+    X_train[col] = X_train[col].fillna("Missing").astype(str)
     top_codes = X_train[col].value_counts().head(50).index
     diag_top_codes[col] = set(top_codes)
 
     X_train[col] = np.where(X_train[col].isin(top_codes), X_train[col], "Other")
 
     for split_df in (X_valid, X_test):
-        split_df[col] = split_df[col].astype(str)
+        split_df[col] = split_df[col].fillna("Missing").astype(str)
         split_df[col] = np.where(
             split_df[col].isin(diag_top_codes[col]), split_df[col], "Other"
         )
-
 
 # ==========================================
 # Medical specialty — fit on TRAIN only
